@@ -62,6 +62,6 @@ view model =
 
 renderCard : Card -> Html Msg
 renderCard card =
-    div []
+    div [ class "h4 w4 center" ]
         [ img [ src card.img ] []
         ]
