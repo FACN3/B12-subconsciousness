@@ -1,0 +1,21 @@
+{
+  "name": "y",
+  "version": "1.0.0",
+  "description": "Memory game built in Elm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "elm-live src/Main.elm --open --pushstate --debug --output=public/elm.js --dir=public",
+    "build": "elm-make src/Main.elm --output=public/elm.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FACN3/B12-subconsciousness.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FACN3/B12-subconsciousness/issues"
+  },
+  "homepage": "https://github.com/FACN3/B12-subconsciousness#readme"
+}
