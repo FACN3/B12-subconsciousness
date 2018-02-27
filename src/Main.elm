@@ -6,6 +6,9 @@ import Html.Events exposing (..)
 import List.Extra exposing (..)
 import Random exposing (generate)
 import Random.List exposing (shuffle)
+import Time exposing (..)
+import Task exposing (..)
+import Process exposing (..)
 
 
 main : Program Never Model Msg
@@ -59,6 +62,7 @@ type Msg
     = NoOp
     | ShuffleCards
     | ShuffledDeck (List Card)
+    | FlipBack
 
 
 subscriptions : Model -> Sub Msg
@@ -66,14 +70,22 @@ subscriptions model =
     Sub.none
 
 
+timeout3Sec : Cmd Msg
+timeout3Sec =
+    Process.sleep (1 * Time.second) |> Task.perform (\_ -> FlipBack)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        FlipBack ->
+            { model | cards = List.map (\x -> { x | flipped = False }) model.cards } ! []
+
         ShuffleCards ->
             ( model, generate ShuffledDeck (shuffle model.cards) )
 
         ShuffledDeck shuffledDeck ->
-            { model | cards = List.map (\x -> { x | flipped = True }) shuffledDeck, hideBtn = True } ! []
+            { model | cards = List.map (\x -> { x | flipped = True }) shuffledDeck, hideBtn = True } ! [ timeout3Sec ]
 
         NoOp ->
             model ! []
