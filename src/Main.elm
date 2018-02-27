@@ -31,8 +31,8 @@ type alias Card =
 
 type alias Model =
     { cards : List Card
-    , backImage : String
     , hideBtn : Bool
+    , firstCard : Maybe String
     }
 
 
@@ -52,9 +52,13 @@ cards =
 init : ( Model, Cmd Msg )
 init =
     Model
-        (interweave cards cards)
-        "https://theanalyticalcouchpotato.files.wordpress.com/2012/04/mtg-card-back1.jpg"
+        (List.indexedMap
+            (\i x -> { x | id = x.id ++ (toString i) })
+         <|
+            (interweave cards cards)
+        )
         False
+        Nothing
         ! []
 
 
@@ -63,6 +67,8 @@ type Msg
     | ShuffleCards
     | ShuffledDeck (List Card)
     | FlipBack
+    | ShowCard Card
+    | MatchFound String
 
 
 subscriptions : Model -> Sub Msg
@@ -70,22 +76,75 @@ subscriptions model =
     Sub.none
 
 
-timeout3Sec : Cmd Msg
-timeout3Sec =
-    Process.sleep (1 * Time.second) |> Task.perform (\_ -> FlipBack)
+timeout : Msg -> Int -> Cmd Msg
+timeout msg time =
+    Process.sleep (Time.second * (toFloat time)) |> Task.perform (\_ -> msg)
+
+
+matchingPair : List String -> String -> Bool
+matchingPair currentPair card =
+    List.head currentPair == Just card
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        MatchFound string ->
+            { model
+                | firstCard = Nothing
+                , cards =
+                    List.map
+                        (\x ->
+                            if x.img == string then
+                                { x | matchFound = True }
+                            else
+                                x
+                        )
+                        model.cards
+            }
+                ! []
+
+        ShowCard card ->
+            let
+                cmd =
+                    case model.firstCard of
+                        Just string ->
+                            if string == card.img then
+                                timeout (MatchFound string) 1
+                            else
+                                timeout FlipBack 1
+
+                        Nothing ->
+                            Cmd.none
+            in
+                { model
+                    | cards =
+                        List.map
+                            (\x ->
+                                if x.id == card.id then
+                                    { x | flipped = True }
+                                else
+                                    x
+                            )
+                            model.cards
+                    , firstCard =
+                        case model.firstCard of
+                            Just string ->
+                                Nothing
+
+                            Nothing ->
+                                Just card.img
+                }
+                    ! [ cmd ]
+
         FlipBack ->
-            { model | cards = List.map (\x -> { x | flipped = False }) model.cards } ! []
+            { model | cards = List.map (\x -> { x | flipped = False }) model.cards, firstCard = Nothing } ! []
 
         ShuffleCards ->
             ( model, generate ShuffledDeck (shuffle model.cards) )
 
         ShuffledDeck shuffledDeck ->
-            { model | cards = List.map (\x -> { x | flipped = True }) shuffledDeck, hideBtn = True } ! [ timeout3Sec ]
+            { model | cards = List.map (\x -> { x | flipped = True }) shuffledDeck, hideBtn = True } ! [ (timeout FlipBack 1) ]
 
         NoOp ->
             model ! []
@@ -105,11 +164,13 @@ renderCard : Card -> Html Msg
 renderCard card =
     let
         cardUrl =
-            if card.flipped then
+            if card.matchFound then
+                "https://3.imimg.com/data3/TE/RL/MY-2020667/plain-grey-250x250.jpg"
+            else if card.flipped then
                 card.img
             else
                 "https://d1u5p3l4wpay3k.cloudfront.net/mtgsalvation_gamepedia/7/7a/Magic_card_back_2.jpg?version=6d697ae1a0e6361ac10505af3c75387a"
     in
         div [ class "w-25 pv3 tc" ]
-            [ img [ src cardUrl, class "h4 w4 br3" ] []
+            [ img [ onClick (ShowCard card), src cardUrl, class "h4 w4 br3" ] []
             ]
