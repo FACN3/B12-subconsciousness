@@ -82,8 +82,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [ class "flex items-center justify-center" ]
-            [ button [ hidden model.hideBtn, onClick ShuffleCards, class "mv4" ] [ text "New Game" ]
+        [ div [ class "tc", hidden model.hideBtn ]
+            [ button [ onClick ShuffleCards, class "mv4" ] [ text "New Game" ]
             ]
         , div [ class "flex w-100 justify-center items-center flex-wrap ph7 pv2" ] (model.cards |> List.map renderCard)
         ]
