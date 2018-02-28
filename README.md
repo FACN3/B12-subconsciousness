@@ -12,4 +12,4 @@ run the app :
 `npm run dev`
 
 to build the app :
-`npm run build
+`npm run build`
