@@ -33,7 +33,7 @@ type alias Card =
 type alias Model =
     { cards : List Card
     , hideBtn : Bool
-    , firstCard : Maybe String
+    , firstCard : Maybe Card
     , uiLocked : UiLocked
     }
 
@@ -133,9 +133,9 @@ update msg model =
             let
                 cmd =
                     case model.firstCard of
-                        Just string ->
-                            if string == card.img then
-                                timeout (MatchFound string) 1
+                        Just oldCard ->
+                            if oldCard.img == card.img && oldCard.id /= card.id then
+                                timeout (MatchFound oldCard.img) 1
                             else
                                 timeout FlipBack 1
 
@@ -165,7 +165,7 @@ update msg model =
                                 Nothing
 
                             Nothing ->
-                                Just card.img
+                                Just card
                 }
                     ! [ cmd ]
 
