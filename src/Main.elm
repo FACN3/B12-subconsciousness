@@ -230,13 +230,13 @@ renderCard model card =
             else if card.flipped then
                 card.img
             else
-                "https://d1u5p3l4wpay3k.cloudfront.net/mtgsalvation_gamepedia/7/7a/Magic_card_back_2.jpg?version=6d697ae1a0e6361ac10505af3c75387a"
+                "/assets/Magic_card_back_EDITED.jpg"
     in
         div [ class "w-25 pv3 tc" ]
             [ img
                 [ onClick clickMsg
                 , src cardUrl
-                , class "h4 w4 br3"
+                , class "h4 w4 br2"
                 ]
                 []
             ]
