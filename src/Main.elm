@@ -35,12 +35,21 @@ type alias Model =
     , hideBtn : Bool
     , firstCard : Maybe Card
     , uiLocked : UiLocked
+    , currentPlayer : Player
+    , playerOneScore : Int
+    , playerTwoScore : Int
     }
 
 
 type UiLocked
     = Locked
     | Unlocked
+
+
+type Player
+    = PlayerOne
+    | PlayerTwo
+    | NoPlayer
 
 
 cards : List Card
@@ -67,6 +76,9 @@ init =
         False
         Nothing
         Locked
+        NoPlayer
+        0
+        0
         ! []
 
 
@@ -110,6 +122,7 @@ update msg model =
                                 model.cards
                         , hideBtn = False
                         , uiLocked = Locked
+                        , currentPlayer = NoPlayer
                     }
                         ! []
 
@@ -126,6 +139,36 @@ update msg model =
                                         x
                                 )
                                 model.cards
+                        , currentPlayer =
+                            case model.currentPlayer of
+                                PlayerOne ->
+                                    PlayerTwo
+
+                                PlayerTwo ->
+                                    PlayerOne
+
+                                NoPlayer ->
+                                    NoPlayer
+                        , playerOneScore =
+                            case model.currentPlayer of
+                                PlayerOne ->
+                                    (model.playerOneScore + 1)
+
+                                PlayerTwo ->
+                                    model.playerOneScore
+
+                                NoPlayer ->
+                                    0
+                        , playerTwoScore =
+                            case model.currentPlayer of
+                                PlayerTwo ->
+                                    (model.playerTwoScore + 1)
+
+                                PlayerOne ->
+                                    model.playerTwoScore
+
+                                NoPlayer ->
+                                    0
                     }
                         ! []
 
@@ -177,6 +220,16 @@ update msg model =
                         model.cards
                 , firstCard = Nothing
                 , uiLocked = Unlocked
+                , currentPlayer =
+                    case model.currentPlayer of
+                        PlayerOne ->
+                            PlayerTwo
+
+                        PlayerTwo ->
+                            PlayerOne
+
+                        NoPlayer ->
+                            PlayerOne
             }
                 ! []
 
@@ -207,11 +260,11 @@ header model =
             [ div [ class "mt0 pt3 flex justify-between row items-center" ]
                 [ div []
                     [ h1 [ class "player-1 mt0" ] [ text "Player 1" ]
-                    , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString 0)) ]
+                    , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString model.playerOneScore)) ]
                     ]
                 , div []
                     [ h1 [ class "player-2 mt0" ] [ text "Player 2" ]
-                    , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString 0)) ]
+                    , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString model.playerTwoScore)) ]
                     ]
                 ]
             ]
