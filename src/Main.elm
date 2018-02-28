@@ -195,12 +195,33 @@ update msg model =
             model ! []
 
 
+header : Model -> Html Msg
+header model =
+    div [ class "tc" ]
+        [ div [ hidden model.hideBtn ]
+            [ h1 [ class "mt0 pt3 title-color title--text" ] [ text "Magic Match \x1F9D9" ]
+            , h3 [ class "title-color custom--text tracked" ] [ text "You're going to have 1 sec to look at the cards, Good luck!" ]
+            , button [ onClick ShuffleCards, class "btn-reset mt2 mb4 pv3 ph4 custom--text tracked f4 button-background bn b--none button-reset custom-white fw7 br3 " ] [ text "New Game" ]
+            ]
+        , div [ hidden (not model.hideBtn), class "ph7" ]
+            [ div [ class "mt0 pt3 flex justify-between row items-center" ]
+                [ div []
+                    [ h1 [ class "player-1 mt0" ] [ text "Player 1" ]
+                    , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString 0)) ]
+                    ]
+                , div []
+                    [ h1 [ class "player-2 mt0" ] [ text "Player 2" ]
+                    , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString 0)) ]
+                    ]
+                ]
+            ]
+        ]
+
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ div [ class "tc", hidden model.hideBtn ]
-            [ button [ onClick ShuffleCards, class "btn-reset mv4 pv2 ph3 bg-green white br3 " ] [ text "New Game" ]
-            ]
+    div [ class "bg--custom-white" ]
+        [ header model
         , div [ class "flex w-100 justify-center items-center flex-wrap ph7 pv2" ] (model.cards |> List.map (renderCard model))
         ]
 
@@ -230,9 +251,9 @@ renderCard model card =
             else if card.flipped then
                 card.img
             else
-                "https://d1u5p3l4wpay3k.cloudfront.net/mtgsalvation_gamepedia/7/7a/Magic_card_back_2.jpg?version=6d697ae1a0e6361ac10505af3c75387a"
+                "https://theanalyticalcouchpotato.files.wordpress.com/2012/04/mtg-card-back1.jpg"
     in
-        div [ class "w-25 pv3 tc" ]
+        div [ class "w-25 pv2 tc" ]
             [ img
                 [ onClick clickMsg
                 , src cardUrl
