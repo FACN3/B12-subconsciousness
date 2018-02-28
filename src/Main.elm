@@ -38,6 +38,8 @@ type alias Model =
     , currentPlayer : Player
     , playerOneScore : Int
     , playerTwoScore : Int
+    , winner : Player
+    , gameOver : Bool
     }
 
 
@@ -79,6 +81,8 @@ init =
         NoPlayer
         0
         0
+        NoPlayer
+        False
         ! []
 
 
@@ -100,8 +104,8 @@ timeout msg time =
     Process.sleep (Time.second * (toFloat time)) |> Task.perform (\_ -> msg)
 
 
-gameOver : Model -> Bool
-gameOver currentState =
+isGameOver : Model -> Bool
+isGameOver currentState =
     let
         cardsMatched =
             List.filter (\x -> not (x.matchFound || x.flipped)) currentState.cards
@@ -113,7 +117,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         MatchFound string ->
-            case (gameOver model) of
+            case (isGameOver model) of
                 True ->
                     { model
                         | cards =
@@ -123,6 +127,14 @@ update msg model =
                         , hideBtn = False
                         , uiLocked = Locked
                         , currentPlayer = NoPlayer
+                        , gameOver = True
+                        , winner =
+                            if (model.playerOneScore > model.playerTwoScore) then
+                                PlayerOne
+                            else if (model.playerOneScore < model.playerTwoScore) then
+                                PlayerTwo
+                            else
+                                NoPlayer
                     }
                         ! []
 
@@ -241,6 +253,10 @@ update msg model =
                 | cards = List.map (\x -> { x | flipped = True }) shuffledDeck
                 , hideBtn = True
                 , uiLocked = Locked
+                , winner = NoPlayer
+                , gameOver = False
+                , playerOneScore = 0
+                , playerTwoScore = 0
             }
                 ! [ (timeout FlipBack 2) ]
 
@@ -262,6 +278,16 @@ header model =
                     [ h1 [ class "player-1 mt0" ] [ text "Player 1" ]
                     , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString model.playerOneScore)) ]
                     ]
+                , div [ class "custom--text custom-yellow f2" ]
+                    [ text
+                        (if model.currentPlayer == NoPlayer then
+                            ""
+                         else if model.currentPlayer == PlayerOne then
+                            "Player 1"
+                         else
+                            "Player 2"
+                        )
+                    ]
                 , div []
                     [ h1 [ class "player-2 mt0" ] [ text "Player 2" ]
                     , Html.span [ class "title-color f3" ] [ text ("Score : " ++ (toString model.playerTwoScore)) ]
@@ -273,10 +299,37 @@ header model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "bg--custom-white" ]
-        [ header model
-        , div [ class "flex w-100 justify-center items-center flex-wrap ph7 pv2" ] (model.cards |> List.map (renderCard model))
-        ]
+    let
+        winner =
+            case model.gameOver of
+                True ->
+                    case model.winner of
+                        PlayerOne ->
+                            "Player 1 Wins!!"
+
+                        PlayerTwo ->
+                            "Player 2 Wins!!"
+
+                        NoPlayer ->
+                            "It's a Tie!!"
+
+                False ->
+                    ""
+    in
+        div [ class "bg--custom" ]
+            [ header model
+            , div
+                [ hidden
+                    (if winner == "" then
+                        True
+                     else
+                        False
+                    )
+                , class "f1 custom-yellow title--text flex items-center justify-center"
+                ]
+                [ text winner ]
+            , div [ class "flex w-100 justify-center items-center flex-wrap ph7 pv2" ] (model.cards |> List.map (renderCard model))
+            ]
 
 
 renderCard : Model -> Card -> Html Msg
