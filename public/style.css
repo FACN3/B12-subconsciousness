@@ -1,0 +1,33 @@
+.bg--custom-white {
+  background-color: #3f88c5;
+}
+
+.custom-white {
+  color: #fdfffc;
+}
+
+.title-color {
+  color: #3c3c3b;
+}
+
+.button-background {
+  background-color: #ffa400;
+}
+
+.player-1 {
+  color: #001627;
+  font-family: 'Bubblegum Sans', cursive;
+}
+
+.player-2 {
+  color: #ff0022;
+  font-family: 'Bubblegum Sans', cursive;
+}
+
+.title--text {
+  font-family: 'Fontdiner Swanky', cursive;
+}
+
+.custom--text {
+  font-family: 'Bubblegum Sans', cursive;
+}
